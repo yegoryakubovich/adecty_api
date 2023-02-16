@@ -15,8 +15,13 @@
 #
 
 
-from app import app_create
+class ResponseStatus:
+    successful = 'successful'
+    error = 'error'
 
 
-if __name__ == "__main__":
-    app_create()
+def data_output(status: str, message=None, **kwargs):
+    response = kwargs
+    response['status'] = status
+    response['message'] = message if message else 'Request completed successfully'
+    return response

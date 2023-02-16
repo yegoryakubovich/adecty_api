@@ -15,8 +15,12 @@
 #
 
 
-from app import app_create
+from app.database import tables_create
+from app.web import web_create
 
 
-if __name__ == "__main__":
-    app_create()
+def app_create():
+    tables_create()
+
+    webapp = web_create()
+    webapp.run()

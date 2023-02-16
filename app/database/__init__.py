@@ -15,7 +15,7 @@
 #
 
 
-from app.database.models import Account
+from app.database.models import Account, db_manager
 
 
 models = [
@@ -23,6 +23,7 @@ models = [
 ]
 
 
+@db_manager
 def tables_create():
     for model in models:
         exec('{}.create_table()'.format(model.__name__))

@@ -15,7 +15,6 @@
 #
 
 
-from asyncio import iscoroutinefunction
 from hashlib import pbkdf2_hmac
 
 from peewee import MySQLDatabase, Model, PrimaryKeyField, CharField, DateTimeField, ForeignKeyField, BooleanField
@@ -28,21 +27,29 @@ db = MySQLDatabase(DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, po
 
 
 def db_manager(function):
-    async def wrapper(self, *args, **kwargs):
-        if self.data:
-            return None
+    def wrapper(*args, **kwargs):
+        # Open connection
+        if db.is_closed():
+            db.connect()
 
-        if iscoroutinefunction(function):
-            return await function(self, *args, **kwargs)
-        else:
-            return function(self, *args, **kwargs)
+        result = function(*args, **kwargs)
 
+        # Close connection
+        if not db.is_closed():
+            db.close()
+
+        return result
     return wrapper
 
 
 def password_hash(password: str):
-    password = pbkdf2_hmac('sha256', password.encode('utf-8'), SALT_PASSWORDS.encode('utf-8'), 100000)
-    return password.hex()
+    password = pbkdf2_hmac(
+        hash_name='sha256',
+        password=password.encode('utf-8'),
+        salt=SALT_PASSWORDS.encode('utf-8'),
+        iterations=131072
+    ).hex()
+    return password
 
 
 class BaseModel(Model):

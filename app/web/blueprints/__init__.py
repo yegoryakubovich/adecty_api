@@ -20,4 +20,4 @@ from app.web.blueprints.ads import blueprint_ads
 from app.web.blueprints.wallet import blueprint_wallet
 
 
-blueprints = (blueprint_account, blueprint_ads, blueprint_wallet, )
+blueprints = (blueprint_account, )
