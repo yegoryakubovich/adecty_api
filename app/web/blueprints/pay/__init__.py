@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from datetime import datetime, timezone
 from json import loads
 
 from flask import Blueprint
@@ -20,7 +21,7 @@ from flask import Blueprint
 from app.database.account import Account
 from app.database.account.models import AccountActions
 from app.database.pay import Wallet
-from app.database.pay.models import WalletActions, WalletAction, OfferType, Currency
+from app.database.pay.models import WalletActions, WalletAction, OfferType, Offer, System, OfferActions
 from app.web.functions.data_input import data_input
 from app.web.functions.data_output import data_output, ResponseStatus
 
@@ -52,10 +53,7 @@ def pay_wallet_create(account: Account):
         },
     )
     wallet.action_create(
-        action=WalletActions.wallet_create,
-        data={
-            'wallet_id': wallet.id,
-        },
+        action=WalletActions.create,
     )
 
     return data_output(
@@ -122,6 +120,54 @@ def pay_offer_create(wallet: Wallet, offer_type: str, system_name: str, value_fr
                 wallet_balance=wallet.balance,
             ),
         )
+
+    system = System.get(System.name == system_name)
+    print(datetime.now(timezone.utc))
+    offer = Offer(
+        wallet=wallet,
+        type=offer_type,
+        system=system,
+        value_from=value_from,
+        value_to=value_to,
+        rate=rate,
+        updated_datetime=datetime.now(timezone.utc),
+    )
+    offer.save()
+
+    offer.account_session = wallet.account_session
+
+    offer.action_create(
+        action=OfferActions.create,
+    )
+    offer.action_create(
+        action=OfferActions.update,
+        data={
+            'rate': rate,
+        },
+    )
+    wallet.action_create(
+        action=WalletActions.offer_create,
+        data={
+            'offer_id': offer.id,
+        },
+    )
+
+    wallet.balance = wallet.balance - value_to
+    wallet.balance_frozen = wallet.balance_frozen + value_to
+    wallet.save()
+
+    wallet.action_create(
+        action=WalletActions.balance_frozen,
+        data={
+            'reason': WalletActions.offer_create,
+            'offer_id': offer.id,
+            'balance_before': wallet.balance + value_to,
+            'balance_frozen_before': wallet.balance_frozen - value_to,
+            'frozen': value_to,
+            'balance': wallet.balance,
+            'balance_frozen': wallet.balance_frozen,
+        },
+    )
 
     return data_output(
         status=ResponseStatus.successful,

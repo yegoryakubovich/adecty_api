@@ -37,11 +37,14 @@ database_pay = MySQLDatabase(
 
 
 class WalletActions:
-    wallet_create = 'wallet_create'
+    create = 'create'
+    offer_create = 'offer_create'
+    balance_frozen = 'balance_frozen'
 
 
 class OfferActions:
-    offer_create = 'offer_create'
+    create = 'create'
+    update = 'update'
 
 
 class OfferType:
@@ -117,6 +120,7 @@ class Offer(BaseModel):
     value_from = BigIntegerField()
     value_to = BigIntegerField()
     rate = BigIntegerField()
+    updated_datetime = DateTimeField()
     active = BooleanField(default=False)
     deleted = BooleanField(default=False)
 
