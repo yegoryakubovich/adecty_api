@@ -15,15 +15,17 @@
 #
 
 
-from app.database.models import Account, db_manager
+from app.database.account import models_account
+from app.database.pay import models_pay
 
 
 models = [
-    Account,
+    models_account,
+    models_pay,
 ]
 
 
-@db_manager
 def tables_create():
     for model in models:
-        exec('{}.create_table()'.format(model.__name__))
+        for num, m in enumerate(model):
+            model[num].create_table()

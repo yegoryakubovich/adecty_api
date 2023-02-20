@@ -16,8 +16,8 @@
 
 
 from app.web.blueprints.account import blueprint_account
-from app.web.blueprints.ads import blueprint_ads
-from app.web.blueprints.wallet import blueprint_wallet
+from app.web.blueprints.errors import blueprint_errors
+from app.web.blueprints.pay import blueprint_pay
 
 
-blueprints = (blueprint_account, )
+blueprints = (blueprint_errors, blueprint_account, blueprint_pay)

@@ -15,31 +15,23 @@
 #
 
 
+from datetime import datetime, timezone
 from hashlib import pbkdf2_hmac
+from json import dumps
+from secrets import token_hex
 
 from peewee import MySQLDatabase, Model, PrimaryKeyField, CharField, DateTimeField, ForeignKeyField, BooleanField
 
-from config import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, SALT_PASSWORDS
+from config import DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, SALT_PASSWORDS
 
-
-db = MySQLDatabase(DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT, charset='utf8mb4',
-                   autoconnect=False)
-
-
-def db_manager(function):
-    def wrapper(*args, **kwargs):
-        # Open connection
-        if db.is_closed():
-            db.connect()
-
-        result = function(*args, **kwargs)
-
-        # Close connection
-        if not db.is_closed():
-            db.close()
-
-        return result
-    return wrapper
+db = MySQLDatabase(
+    database='adecty_account',
+    user=DB_USER,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    port=DB_PORT,
+    charset='utf8mb4'
+)
 
 
 def password_hash(password: str):
@@ -52,6 +44,17 @@ def password_hash(password: str):
     return password
 
 
+def token_create():
+    return token_hex(32)
+
+
+class AccountActions:
+    account_create = 'account_create'
+    account_token_create = 'account_token_create'
+    pay_wallet_create = 'pay_wallet_create'
+    pay_wallet_delete = 'pay_wallet_delete'
+
+
 class BaseModel(Model):
     class Meta:
         database = db
@@ -61,7 +64,6 @@ class Account(BaseModel):
     id = PrimaryKeyField()
     username = CharField(max_length=32, unique=True)
     password = CharField(max_length=64)
-    datetime = DateTimeField()
 
     def password_check(self, password):
         if password_hash(password) == self.password:
@@ -69,24 +71,50 @@ class Account(BaseModel):
         else:
             return False
 
+    def action_create(self, action: str, data=None):
+
+        account_session = self.account_session if hasattr(self, 'account_session') else None
+
+        account_action = AccountAction(
+            account=self,
+            account_session=account_session,
+            action=action,
+            data=dumps(data if data else {}),
+            datetime=datetime.now(timezone.utc)
+        )
+        account_action.save()
+
     class Meta:
         db_table = 'accounts'
 
 
-class Session(BaseModel):
+class AccountSession(BaseModel):
     id = PrimaryKeyField()
     account = ForeignKeyField(Account, to_field='id')
     token = CharField(max_length=256)
-    datetime = DateTimeField()
-    datetime_closed = DateTimeField(null=True, default=None)
     closed = BooleanField(default=False)
 
     class Meta:
-        db_table = 'sessions'
+        db_table = 'accounts_sessions'
 
 
-class Action(BaseModel):
+class AccountSessionDevice(BaseModel):
     id = PrimaryKeyField()
-    session = ForeignKeyField(Session, to_field='id')
+    account_session = ForeignKeyField(AccountSession, to_field='id')
     name = CharField(max_length=256)
+    ip_4 = CharField(max_length=15)
+
+    class Meta:
+        db_table = 'accounts_sessions_devices'
+
+
+class AccountAction(BaseModel):
+    id = PrimaryKeyField()
+    account = ForeignKeyField(Account, to_field='id')
+    account_session = ForeignKeyField(AccountSession, to_field='id', null=True, default=None)
+    action = CharField(max_length=256)
+    data = CharField(max_length=1024)
     datetime = DateTimeField()
+
+    class Meta:
+        db_table = 'accounts_actions'

@@ -15,7 +15,16 @@
 #
 
 
-from flask import Blueprint
+from app.database.pay.models import Currency, System, Wallet, WalletAction, Offer, OfferAction, Deal, DealAction
 
 
-blueprint_ads = Blueprint('blueprint_ads', __name__, url_prefix='/ads')
+models_pay = [
+    Currency,
+    System,
+    Wallet,
+    WalletAction,
+    Offer,
+    OfferAction,
+    Deal,
+    DealAction,
+]

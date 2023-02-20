@@ -15,7 +15,12 @@
 #
 
 
-from flask import Blueprint
+from app.database.account.models import Account, AccountSession, AccountSessionDevice, AccountAction
 
 
-blueprint_wallet = Blueprint('blueprint_wallet', __name__, url_prefix='/wallet')
+models_account = (
+    Account,
+    AccountSession,
+    AccountSessionDevice,
+    AccountAction,
+)
