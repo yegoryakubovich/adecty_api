@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+from json import loads
 
 from flask import request
 
@@ -101,6 +101,8 @@ def data_input(schema: dict):
                                     ),
                                 )
                             value = int(value)
+                        if requirement_type == 'type' and requirement_value == 'dictionary':
+                            value = loads(value)
                         if requirement_type == 'length_min':
                             if len(value) < requirement_value:
                                 return data_output(

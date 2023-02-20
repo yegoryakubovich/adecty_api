@@ -16,6 +16,7 @@
 
 
 from flask import Blueprint
+# noinspection PyPackageRequirements
 from werkzeug.exceptions import InternalServerError
 
 from app.web.functions.data_output import ResponseStatus, data_output

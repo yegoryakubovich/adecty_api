@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+
 from datetime import datetime, timezone
 from json import loads
 
@@ -71,6 +73,7 @@ def pay_wallet_get(wallet: Wallet):
         account_id=wallet.account_id,
         company_id=wallet.company_id,
         balance=wallet.balance,
+        balance_frozen=wallet.balance_frozen,
     )
 
 
@@ -94,16 +97,24 @@ def pay_wallet_actions_get(wallet: Wallet, page: int):
     )
 
 
-@blueprint_pay.route('/offer/create', endpoint='pay_offer_create', methods=('GET',))
+@blueprint_pay.route('/wallet/offer/create', endpoint='pay_wallet_offer_create', methods=('GET',))
 @data_input(schema={
     'account_session_token': {'wallet': True},
     'offer_type': {'value_in': [OfferType.input, OfferType.output]},
     'system_name': {'value_in': 'systems'},
+    'system_data': {'type': 'dictionary'},
     'value_from': {'type': 'integer'},
     'value_to': {'type': 'integer'},
     'rate': {'type': 'integer'},
 })
-def pay_offer_create(wallet: Wallet, offer_type: str, system_name: str, value_from: int, value_to: int, rate: int):
+def pay_wallet_offer_create(
+        wallet: Wallet,
+        offer_type: str,
+        system_name: str,
+        system_data: dict,
+        value_from: int,
+        value_to: int,
+        rate: int):
     if value_from < 1000 or value_to > 10000000:
         return data_output(
             status=ResponseStatus.error,
@@ -122,11 +133,19 @@ def pay_offer_create(wallet: Wallet, offer_type: str, system_name: str, value_fr
         )
 
     system = System.get(System.name == system_name)
-    print(datetime.now(timezone.utc))
+    sd = dict(system)
+    for key in sd.keys():
+        if key not in system_data.keys():
+            return data_output(
+                status=ResponseStatus.error,
+                message='system_data must include the key {key}'.format(key=key),
+            )
+
     offer = Offer(
         wallet=wallet,
         type=offer_type,
         system=system,
+        system_data=system_data,
         value_from=value_from,
         value_to=value_to,
         rate=rate,
@@ -152,8 +171,8 @@ def pay_offer_create(wallet: Wallet, offer_type: str, system_name: str, value_fr
         },
     )
 
-    wallet.balance = wallet.balance - value_to
-    wallet.balance_frozen = wallet.balance_frozen + value_to
+    wallet.balance -= value_to
+    wallet.balance_frozen += value_to
     wallet.save()
 
     wallet.action_create(
@@ -171,4 +190,69 @@ def pay_offer_create(wallet: Wallet, offer_type: str, system_name: str, value_fr
 
     return data_output(
         status=ResponseStatus.successful,
+    )
+
+
+@blueprint_pay.route('/wallet/offers/get', endpoint='pay_wallet_offers_get', methods=('GET',))
+@data_input(schema={
+    'account_session_token': {'wallet': True},
+    'page': {'type': 'integer'},
+})
+def pay_wallet_offers_get(wallet: Wallet, page: int):
+    wallet_offers = [
+        {
+            'id': wo.id,
+            'type': wo.type,
+            'system': {
+                'currency': {
+                    'name': wo.system.currency.name,
+                    'description': wo.system.currency.description,
+                },
+                'name': wo.system.name,
+                'description': wo.system.description,
+            },
+            'value_from': wo.value_from,
+            'value_to': wo.value_to,
+            'rate': wo.rate,
+            'updated_datetime': wo.updated_datetime,
+            'active': wo.active,
+        } for wo in Offer.select().where((Offer.wallet == wallet) &
+                                         (Offer.deleted == False)).limit(10).offset(10 * page - 10)
+    ]
+    return data_output(
+        status=ResponseStatus.successful,
+        page=page,
+        wallet_offers=wallet_offers,
+    )
+
+
+@blueprint_pay.route('/wallet/offer/update', endpoint='pay_wallet_offer_update', methods=('GET',))
+@data_input(schema={
+    'account_session_token': {'wallet': True},
+    'page': {'type': 'integer'},
+})
+def pay_wallet_offer_update(wallet: Wallet, page: int):
+    wallet_offers = [
+        {
+            'type': wo.type,
+            'system': {
+                'currency': {
+                    'name': wo.system.currency.name,
+                    'description': wo.system.currency.description,
+                },
+                'name': wo.system.name,
+                'description': wo.system.description,
+            },
+            'value_from': wo.value_from,
+            'value_to': wo.value_to,
+            'rate': wo.rate,
+            'updated_datetime': wo.updated_datetime,
+            'active': wo.active,
+        } for wo in Offer.select().where((Offer.wallet == wallet) &
+                                         (Offer.deleted == False)).limit(10).offset(10 * page - 10)
+    ]
+    return data_output(
+        status=ResponseStatus.successful,
+        page=page,
+        wallet_offers=wallet_offers,
     )

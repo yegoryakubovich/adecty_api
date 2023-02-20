@@ -16,14 +16,12 @@
 
 
 from datetime import datetime, timezone
-from hashlib import pbkdf2_hmac
 from json import dumps
-from secrets import token_hex
 
 from peewee import MySQLDatabase, Model, PrimaryKeyField, CharField, DateTimeField, ForeignKeyField, BooleanField, \
     BigIntegerField, IntegerField
 
-from config import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, SALT_PASSWORDS
+from config import DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
 
 
 database_pay = MySQLDatabase(
@@ -81,8 +79,8 @@ class System(BaseModel):
 
 class Wallet(BaseModel):
     id = PrimaryKeyField()
-    account_id = BigIntegerField(null=True, default=None)
-    company_id = BigIntegerField(null=True, default=None)
+    account_id = BigIntegerField(null=True)
+    company_id = BigIntegerField(null=True)
     balance = BigIntegerField()
     balance_frozen = BigIntegerField()
 
@@ -114,9 +112,10 @@ class WalletAction(BaseModel):
 
 class Offer(BaseModel):
     id = PrimaryKeyField()
-    wallet = ForeignKeyField(Wallet, to_field='id')
     type = CharField(max_length=16)
+    wallet = ForeignKeyField(Wallet, to_field='id')
     system = ForeignKeyField(System, to_field='id')
+    system_data = CharField(max_length=1024)
     value_from = BigIntegerField()
     value_to = BigIntegerField()
     rate = BigIntegerField()

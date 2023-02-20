@@ -24,6 +24,7 @@ from peewee import MySQLDatabase, Model, PrimaryKeyField, CharField, DateTimeFie
 
 from config import DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, SALT_PASSWORDS
 
+
 db = MySQLDatabase(
     database='adecty_account',
     user=DB_USER,

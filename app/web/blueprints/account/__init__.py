@@ -19,8 +19,7 @@ from datetime import datetime, timezone
 
 from flask import Blueprint
 
-from app.database.account.models import Account, AccountSession, AccountActions, password_hash, token_create, \
-    AccountSessionDevice
+from app.database.account.models import Account, AccountSession, AccountActions, password_hash, token_create
 from app.web.functions.data_input import data_input, device_get
 from app.web.functions.data_output import data_output, ResponseStatus
 
@@ -32,7 +31,6 @@ password_charset_allowed = '!#$%&()*+,-./:;<=>?@[\]^_`{|}~' \
                            'abcdefghijklmnopqrstuvwxyz' \
                            '0123456789'
 username_charset_allowed = '_-.' \
-                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ' \
                            'abcdefghijklmnopqrstuvwxyz' \
                            '0123456789'
 
