@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from json import loads
+
 
 from flask import request
 
@@ -102,14 +102,29 @@ def data_input(schema: dict):
                                 )
                             value = int(value)
                         if requirement_type == 'type' and requirement_value == 'dictionary':
-                            value = loads(value)
+                            if type(value) != dict:
+                                return data_output(
+                                    status=ResponseStatus.error,
+                                    message='Key {key} must match the type {key_type}'.format(
+                                        key=key,
+                                        key_type=requirement_value,
+                                    ),
+                                )
+                        if requirement_type == 'type' and requirement_value == 'boolean':
+                            if type(value) != bool:
+                                return data_output(
+                                    status=ResponseStatus.error,
+                                    message='Key {key} must match the type {key_type}'.format(
+                                        key=key,
+                                        key_type=requirement_value,
+                                    ),
+                                )
                         if requirement_type == 'length_min':
                             if len(value) < requirement_value:
                                 return data_output(
                                     status=ResponseStatus.error,
-                                    message=
-                                    'Key length {key} be at least {requirement_value} characters. '
-                                    'Your length: {length}'.format(
+                                    message='Key length {key} be at least {requirement_value} characters. '
+                                            'Your length: {length}'.format(
                                         key=key,
                                         requirement_value=requirement_value,
                                         length=len(value),
@@ -119,9 +134,8 @@ def data_input(schema: dict):
                             if len(value) > requirement_value:
                                 return data_output(
                                     status=ResponseStatus.error,
-                                    message=
-                                    'Key length {key} must be no more than '
-                                    '{requirement_value} characters. Your length: {length}'.format(
+                                    message='Key length {key} must be no more than '
+                                            '{requirement_value} characters. Your length: {length}'.format(
                                         key=key,
                                         requirement_value=requirement_value,
                                         length=len(value),
@@ -132,9 +146,8 @@ def data_input(schema: dict):
                                 if character not in requirement_value:
                                     return data_output(
                                         status=ResponseStatus.error,
-                                        message=
-                                        '{key} must contain only characters {requirement_value}. '
-                                        'Forbidden symbol used: {character}'.format(
+                                        message='{key} must contain only characters {requirement_value}. '
+                                                'Forbidden symbol used: {character}'.format(
                                             key=key,
                                             requirement_value=requirement_value,
                                             character=character,
@@ -148,8 +161,7 @@ def data_input(schema: dict):
                             if value not in requirement_value:
                                 return data_output(
                                     status=ResponseStatus.error,
-                                    message=
-                                    '{key} must be from the list {requirement_value}'.format(
+                                    message='{key} must be from the list {requirement_value}'.format(
                                         key=key,
                                         requirement_value=requirement_value,
                                     ),
@@ -157,7 +169,9 @@ def data_input(schema: dict):
 
                     data[key] = value
 
-            for key in schema.keys():
+            for key, requirements in schema.items():
+                if 'optional' in requirements.keys():
+                    continue
                 if key not in data.keys():
                     return data_output(
                         status=ResponseStatus.error,

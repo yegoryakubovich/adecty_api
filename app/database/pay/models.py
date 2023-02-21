@@ -43,6 +43,7 @@ class WalletActions:
 class OfferActions:
     create = 'create'
     update = 'update'
+    delete = 'delete'
 
 
 class OfferType:
