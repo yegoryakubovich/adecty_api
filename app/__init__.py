@@ -23,4 +23,4 @@ def app_create():
     tables_create()
 
     webapp = web_create()
-    webapp.run()
+    webapp.run(host='0.0.0.0', port=80)

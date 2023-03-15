@@ -29,10 +29,11 @@ def device_get(account_session=None):
         (AccountSessionDevice.name == name) &
         (AccountSessionDevice.ip_4 == ip_4)
     )
-    if not account_session_device and account_session:
+    if not account_session_device:
         account_session_device = AccountSessionDevice(account_session=account_session, name=name, ip_4=ip_4)
         account_session_device.save()
-        return account_session_device
+    if account_session:
+        return account_session
     return name, ip_4
 
 
