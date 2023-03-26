@@ -71,6 +71,17 @@ def account_create(username, password):
     )
 
 
+@blueprint_account.route('/get', endpoint='account_get', methods=('GET',))
+@data_input(schema={
+    'account_session_token': {'account': True},
+})
+def account_get(account: Account):
+    return data_output(
+        status=ResponseStatus.successful,
+        account_id=account.id,
+    )
+
+
 @blueprint_account.route('/session/create', endpoint='account_session_create', methods=('GET',))
 @data_input(schema={
     'username': {'type': 'string', 'length_min': 8, 'length_max': 32, 'characters_allowed': username_charset_allowed},
