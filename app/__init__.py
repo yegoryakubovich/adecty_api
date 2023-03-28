@@ -1,5 +1,5 @@
 #
-# (c) 2022, Yegor Yakubovich
+# (c) 2023, Yegor Yakubovich
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
 #
 
 
-from app.database import tables_create
-from app.web import web_create
+from flask import Flask
+from app.blueprints import blueprints
 
 
 def app_create():
-    tables_create()
-
-    webapp = web_create()
-    webapp.run(host='0.0.0.0', port=80)
+    app = Flask(__name__)
+    [app.register_blueprint(blueprint) for blueprint in blueprints]
+    return app

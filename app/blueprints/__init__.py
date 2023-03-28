@@ -1,5 +1,5 @@
 #
-# (c) 2022, Yegor Yakubovich
+# (c) 2023, Yegor Yakubovich
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +15,9 @@
 #
 
 
-from flask import Flask
+from app.blueprints.account import blueprint_account
+from app.blueprints.errors import blueprint_errors
+from app.blueprints.pay import blueprint_pay
 
-from app.web.blueprints import blueprints
 
-
-def web_create():
-    web = Flask(__name__)
-    [web.register_blueprint(blueprint) for blueprint in blueprints]
-    return web
+blueprints = (blueprint_errors, blueprint_account, blueprint_pay)

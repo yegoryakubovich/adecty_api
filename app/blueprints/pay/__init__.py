@@ -15,11 +15,15 @@
 #
 
 
-from app import app_create
+from flask import Blueprint
+
+from app.blueprints.pay.systems import blueprint_pay_systems
+from app.blueprints.pay.wallet import blueprint_pay_wallet
+from app.blueprints.pay.wallet_offer import blueprint_pay_wallet_offer
 
 
-app = app_create()
+blueprint_pay = Blueprint('blueprint_pay', __name__, url_prefix='/pay')
+blueprints_pay = (blueprint_pay_wallet_offer, blueprint_pay_wallet, blueprint_pay_systems)
 
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+[blueprint_pay.register_blueprint(blueprint) for blueprint in blueprints_pay]

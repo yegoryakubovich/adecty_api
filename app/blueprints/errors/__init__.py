@@ -1,5 +1,5 @@
 #
-# (c) 2022, Yegor Yakubovich
+# (c) 2023, Yegor Yakubovich
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from flask import Blueprint
 # noinspection PyPackageRequirements
 from werkzeug.exceptions import InternalServerError
 
-from app.web.functions.data_output import ResponseStatus, data_output
+from app.functions.data_output import ResponseStatus, data_output
 
 
 blueprint_errors = Blueprint('blueprint_errors', __name__)

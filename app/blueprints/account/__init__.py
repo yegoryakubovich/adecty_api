@@ -1,5 +1,5 @@
 #
-# (c) 2022, Yegor Yakubovich
+# (c) 2023, Yegor Yakubovich
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ from datetime import datetime, timezone
 from flask import Blueprint
 
 from app.database.account.models import Account, AccountSession, AccountActions, password_hash, token_create
-from app.web.functions.data_input import data_input, device_get
-from app.web.functions.data_output import data_output, ResponseStatus
+from app.functions.data_input import data_input, device_get
+from app.functions.data_output import data_output, ResponseStatus
 
 
 blueprint_account = Blueprint('blueprint_account', __name__, url_prefix='/account')

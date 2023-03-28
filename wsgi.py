@@ -1,5 +1,5 @@
 #
-# (c) 2022, Yegor Yakubovich
+# (c) 2023, Yegor Yakubovich
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +15,8 @@
 #
 
 
-from flask import Blueprint
-
-from app.web.blueprints.pay.wallet import blueprint_pay_wallet
-from app.web.blueprints.pay.wallet_offer import blueprint_pay_wallet_offer
+from main import app
 
 
-blueprint_pay = Blueprint('blueprint_pay', __name__, url_prefix='/pay')
-blueprints_pay = (blueprint_pay_wallet_offer, blueprint_pay_wallet)
-
-
-[blueprint_pay.register_blueprint(blueprint) for blueprint in blueprints_pay]
+if __name__ == "__main__":
+    app.run()

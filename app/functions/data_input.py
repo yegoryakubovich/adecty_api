@@ -1,5 +1,5 @@
 #
-# (c) 2022, Yegor Yakubovich
+# (c) 2023, Yegor Yakubovich
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 from flask import request
 
 from app.database.account import AccountSession, AccountSessionDevice
-from app.database.pay import Wallet, System
-from app.web.functions.data_output import data_output, ResponseStatus
+from app.database.pay import Wallet, System, Currency
+from app.functions.data_output import data_output, ResponseStatus
 
 
 def device_get(account_session=None):
@@ -80,6 +80,18 @@ def data_input(schema: dict):
                                     )
                                 wallet.account_session = account_session
                                 data['wallet'] = wallet
+
+                    if key == 'currency':
+                        currency = Currency.get_or_none(Currency.name == value)
+                        if not currency:
+                            return data_output(
+                                status=ResponseStatus.error,
+                                message='{key} must be from the list {currencies}'.format(
+                                    key=key,
+                                    currencies=[currency.name for currency in Currency.select()],
+                                ),
+                            )
+                        value = currency
 
                     # Validation data
                     for requirement_type, requirement_value in requirements.items():
@@ -171,9 +183,9 @@ def data_input(schema: dict):
                     data[key] = value
 
             for key, requirements in schema.items():
-                if 'optional' in requirements.keys():
-                    continue
                 if key not in data.keys():
+                    if 'optional' in requirements.keys():
+                        continue
                     return data_output(
                         status=ResponseStatus.error,
                         message='Missing key {key}'.format(
