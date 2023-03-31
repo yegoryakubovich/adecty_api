@@ -29,12 +29,16 @@ def device_get(account_session=None):
         (AccountSessionDevice.name == name) &
         (AccountSessionDevice.ip_4 == ip_4)
     )
+    if not account_session:
+        return name, ip_4
     if not account_session_device:
-        account_session_device = AccountSessionDevice(account_session=account_session, name=name, ip_4=ip_4)
+        account_session_device = AccountSessionDevice(
+            account_session=account_session,
+            name=name,
+            ip_4=ip_4,
+        )
         account_session_device.save()
-    if account_session:
-        return account_session
-    return name, ip_4
+    return account_session
 
 
 def data_input(schema: dict):

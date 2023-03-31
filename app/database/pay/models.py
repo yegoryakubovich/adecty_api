@@ -31,6 +31,7 @@ database_pay = MySQLDatabase(
     host=DB_HOST,
     port=DB_PORT,
     charset='utf8mb4',
+    autoconnect=False,
 )
 
 

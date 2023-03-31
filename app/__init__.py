@@ -17,9 +17,14 @@
 
 from flask import Flask
 from app.blueprints import blueprints
+from app.database import before_request, teardown_request, tables_create
 
 
 def app_create():
+    tables_create()
+
     app = Flask(__name__)
     [app.register_blueprint(blueprint) for blueprint in blueprints]
+    app.before_request(before_request)
+    app.teardown_request(teardown_request)
     return app

@@ -26,11 +26,13 @@ from app.functions.data_output import data_output, ResponseStatus
 
 blueprint_account = Blueprint('blueprint_account', __name__, url_prefix='/account')
 
+
 password_charset_allowed = '!#$%&()*+,-./:;<=>?@[\]^_`{|}~' \
                            'ABCDEFGHIJKLMNOPQRSTUVWXYZ' \
                            'abcdefghijklmnopqrstuvwxyz' \
                            '0123456789'
 username_charset_allowed = '_-.' \
+                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ' \
                            'abcdefghijklmnopqrstuvwxyz' \
                            '0123456789'
 
@@ -40,7 +42,9 @@ username_charset_allowed = '_-.' \
     'username': {'type': 'string', 'length_min': 8, 'length_max': 32, 'characters_allowed': username_charset_allowed},
     'password': {'type': 'string', 'length_min': 8, 'length_max': 64, 'characters_allowed': password_charset_allowed},
 })
-def account_create(username, password):
+def account_create(username: str, password: str):
+    username = username.lower()
+
     account = Account.get_or_none(Account.username == username)
     if account:
         return data_output(
@@ -87,7 +91,9 @@ def account_get(account: Account):
     'username': {'type': 'string', 'length_min': 8, 'length_max': 32, 'characters_allowed': username_charset_allowed},
     'password': {'type': 'string', 'length_min': 8, 'length_max': 64, 'characters_allowed': password_charset_allowed},
 })
-def account_session_create(username, password):
+def account_session_create(username: str, password: str):
+    username = username.lower()
+
     account = Account.get_or_none(Account.username == username)
     if not account:
         return data_output(

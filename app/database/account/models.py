@@ -25,13 +25,14 @@ from peewee import MySQLDatabase, Model, PrimaryKeyField, CharField, DateTimeFie
 from config import DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, SALT_PASSWORDS
 
 
-db = MySQLDatabase(
+database_account = MySQLDatabase(
     database='adecty_account',
     user=DB_USER,
     password=DB_PASSWORD,
     host=DB_HOST,
     port=DB_PORT,
-    charset='utf8mb4'
+    charset='utf8mb4',
+    autoconnect=False,
 )
 
 
@@ -58,7 +59,7 @@ class AccountActions:
 
 class BaseModel(Model):
     class Meta:
-        database = db
+        database = database_account
 
 
 class Account(BaseModel):
