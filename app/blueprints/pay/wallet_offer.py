@@ -59,11 +59,11 @@ def pay_wallet_offer_create(wallet: Wallet, offer_type: str, system_name: str, s
 
     system = System.get(System.name == system_name)
     system_data_required = loads(system.data)
-    for key in system_data_required.keys():
-        if key not in system_data.keys():
+    for data in system_data_required:
+        if data['name'] not in system_data.keys():
             return data_output(
                 status=ResponseStatus.error,
-                message='system_data must include the key {key}'.format(key=key),
+                message='system_data must include the key {key}'.format(key=data['name']),
             )
 
     offer = Offer(
@@ -150,6 +150,7 @@ def pay_wallet_offer_get(wallet: Wallet, offer_id: int):
                 },
                 'name': offer.system.name,
                 'description': offer.system.description,
+                'data': offer.system_data,
             },
             'value_from': offer.value_from,
             'value_to': offer.value_to,
@@ -179,7 +180,7 @@ def pay_wallet_offer_update(wallet: Wallet, offer_id: int,
             message='This offer does not exist',
         )
 
-    offer.system_data = offer.system_data if system_data is None else system_data
+    offer.system_data = offer.system_data if system_data is None else dumps(system_data)
     offer.rate = offer.rate if rate is None else rate
     offer.active = offer.active if active is None else active
     offer.updated_datetime = datetime.now(timezone.utc)

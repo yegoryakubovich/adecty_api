@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+from json import loads
 
 from flask import request
 
@@ -119,7 +119,9 @@ def data_input(schema: dict):
                                 )
                             value = int(value)
                         if requirement_type == 'type' and requirement_value == 'dictionary':
-                            if type(value) != dict:
+                            try:
+                                value = loads(value)
+                            except TypeError:
                                 return data_output(
                                     status=ResponseStatus.error,
                                     message='Key {key} must match the type {key_type}'.format(
